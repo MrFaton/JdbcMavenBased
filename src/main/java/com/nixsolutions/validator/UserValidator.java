@@ -3,7 +3,6 @@ package com.nixsolutions.validator;
 import com.nixsolutions.entity.User;
 
 public class UserValidator {
-    private RoleValidator roleValidator = new RoleValidator();
     
     public void validate(final User user) {
         if (user.getLogin().length() == 0) {
@@ -18,6 +17,8 @@ public class UserValidator {
             throw new IllegalArgumentException("Email is empty");
         }
 
-        roleValidator.validate(user.getRole());
+        if (user.getRole().getName().length() == 0) {
+            throw new IllegalArgumentException("Role's name is empty");
+        }
     }
 }

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.nixsolutions.dao.AbstractJdbsDao;
 import com.nixsolutions.dao.UserDao;
 import com.nixsolutions.entity.User;
+import com.nixsolutions.utils.DaoUtils;
 import com.nixsolutions.validator.UserValidator;
 
 public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
@@ -39,6 +40,7 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             + "SELECT * FROM TRAINEESHIP_DB.USER";
     
     private UserValidator userValidator = new UserValidator();
+    private DaoUtils daoUtils = new DaoUtils();
 
     @Override
     public void create(User user) {
@@ -65,11 +67,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             connection.commit();
         } catch (SQLException e) {
             logger.error("Exception during creating " + user, e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(ps);
-            closeResource(connection);
+            daoUtils.closeResources(ps, connection);
         }
     }
 
@@ -99,11 +100,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             connection.commit();
         } catch (SQLException e) {
             logger.error("Exception during updateing " + user, e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(ps);
-            closeResource(connection);
+            daoUtils.closeResources(ps, connection);
         }
     }
 
@@ -128,11 +128,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             connection.commit();
         } catch (SQLException e) {
             logger.error("Exception during removing " + user, e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(ps);
-            closeResource(connection);
+            daoUtils.closeResources(ps, connection);
         }
     }
 
@@ -157,12 +156,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             return userList;
         } catch (SQLException e) {
             logger.error("Exception during searching for all users", e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(resultSet);
-            closeResource(statement);
-            closeResource(connection);
+            daoUtils.closeResources(resultSet, statement, connection);
         }
     }
 
@@ -196,12 +193,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             logger.error(
                     "Exception during searching for user with login = " + login,
                     e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(resultSet);
-            closeResource(statement);
-            closeResource(connection);
+            daoUtils.closeResources(resultSet, statement, connection);
         }
     }
 
@@ -235,12 +230,10 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
             logger.error(
                     "Exception during searching for user with email = " + email,
                     e);
-            rollBackConnection(connection);
+            daoUtils.rollBackConnection(connection);
             throw new RuntimeException(e);
         } finally {
-            closeResource(resultSet);
-            closeResource(statement);
-            closeResource(connection);
+            daoUtils.closeResources(resultSet, statement, connection);
         }
     }
 
@@ -260,25 +253,5 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
         user.setRole(jdbcRoleDao.findByRoleId(resultSet.getInt("ROLE_ID")));
 
         return user;
-    }
-
-    private void rollBackConnection(Connection connection) {
-        if (connection != null) {
-            try {
-                connection.rollback();
-            } catch (SQLException sqlEx) {
-                logger.error("Can't rollback connection", sqlEx);
-            }
-        }
-    }
-
-    private <T extends AutoCloseable> void closeResource(T resource) {
-        try {
-            if (resource != null) {
-                resource.close();
-            }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
     }
 }
