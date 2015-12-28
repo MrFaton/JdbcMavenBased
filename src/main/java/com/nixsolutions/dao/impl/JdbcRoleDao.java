@@ -29,12 +29,14 @@ public class JdbcRoleDao extends AbstractJdbsDao implements RoleDao {
 
     private static final String SQL_SELECT = ""
             + "SELECT * FROM TRAINEESHIP_DB.ROLE";
+    
+    private RoleValidator roleValidator = new RoleValidator();
 
     @Override
     public void create(Role role) {
         logger.trace("create " + role);
 
-        RoleValidator.validate(role);
+        roleValidator.validate(role);
 
         Connection connection = null;
         PreparedStatement ps = null;
@@ -61,7 +63,7 @@ public class JdbcRoleDao extends AbstractJdbsDao implements RoleDao {
     public void update(Role role) {
         logger.trace("update " + role);
 
-        RoleValidator.validate(role);
+        roleValidator.validate(role);
 
         Connection connection = null;
         PreparedStatement ps = null;

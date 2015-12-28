@@ -37,12 +37,14 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
 
     private static final String SQL_SELECT = ""
             + "SELECT * FROM TRAINEESHIP_DB.USER";
+    
+    private UserValidator userValidator = new UserValidator();
 
     @Override
     public void create(User user) {
         logger.trace("create " + user);
 
-        UserValidator.validate(user);
+        userValidator.validate(user);
 
         Connection connection = null;
         PreparedStatement ps = null;
@@ -75,7 +77,7 @@ public class JdbcUserDao extends AbstractJdbsDao implements UserDao {
     public void update(User user) {
         logger.trace("update " + user);
 
-        UserValidator.validate(user);
+        userValidator.validate(user);
 
         Connection connection = null;
         PreparedStatement ps = null;
